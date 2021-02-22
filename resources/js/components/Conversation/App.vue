@@ -24,18 +24,23 @@
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue'
 import { required, minLength } from 'vuelidate/lib/validators'
 
 export default {
   components: {
   },
   mounted () {
-      // TODO: initiate conversation in API
-      console.log('Conversacion iniciada')
+      axios.get('api/getAuthorizationApi')
+      .then(res => {
+          this.chatUrl = res.data
+          console.log('Conversacion iniciada correctamente')
+      }).catch(err => {
+          console.log(err)
+      })
   },
   data () {
     return {
+      chatUrl: '',
       form: {
         text: null
       }
@@ -55,12 +60,7 @@ export default {
       if (this.$v.form.$anyError) {
         return;
       }
-      axios.post('api/getAuthorizationApi', this.form)
-      .then(res => {
-          console.log(res)
-      }).catch(err => {
-          console.log(err)
-      })
+      
       console.log(this.form.text)
       this.form.text=''
     },

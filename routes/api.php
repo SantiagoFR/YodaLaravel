@@ -18,4 +18,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('getAuthorizationApi', 'App\Http\Controllers\ApiController@getAuthorizationApi');
+Route::get('getAuthorizationApi', 'App\Http\Controllers\ApiController@getAuthorizationApi');
