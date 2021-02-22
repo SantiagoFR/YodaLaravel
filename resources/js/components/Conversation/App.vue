@@ -36,7 +36,6 @@ export default {
   },
   data () {
     return {
-      text: '',
       form: {
         text: null
       }
@@ -56,6 +55,12 @@ export default {
       if (this.$v.form.$anyError) {
         return;
       }
+      axios.post('api/getAuthorizationApi', this.form)
+      .then(res => {
+          console.log(res)
+      }).catch(err => {
+          console.log(err)
+      })
       console.log(this.form.text)
       this.form.text=''
     },
