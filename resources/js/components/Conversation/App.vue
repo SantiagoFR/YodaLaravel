@@ -1,6 +1,5 @@
 <template>
   <div>
-    
     <b-form @submit.prevent="onSubmit">
       <b-row class="justify-content-center">
         <b-col cols="7">
