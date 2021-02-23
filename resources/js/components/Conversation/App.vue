@@ -19,19 +19,28 @@
         </b-col>
       </b-row>
     </b-form>
+    <div class="row justify-content-center">
+      <div class="col-9">
+        <section ref="chatArea" class="chat-area">
+        <p v-for="message in messages" class="message" :class="{ 'message-out': message.author === 'you', 'message-in': message.author !== 'you' }">
+          {{ message.text }}
+        </p>
+      </section>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+//TODO: Change form to HTML
 import { required, minLength } from 'vuelidate/lib/validators'
 
 export default {
   components: {
   },
   mounted () {
-      axios.get('api/getAuthorizationApi')
+      axios.get('getAuthorizationApi')
       .then(res => {
-          this.chatUrl = res.data
           console.log('Conversacion iniciada correctamente')
       }).catch(err => {
           console.log(err)
@@ -39,7 +48,7 @@ export default {
   },
   data () {
     return {
-      chatUrl: '',
+      messages: [],
       form: {
         text: null
       }
@@ -59,6 +68,19 @@ export default {
       if (this.$v.form.$anyError) {
         return;
       }
+      this.messages.push({
+        'text': this.form.text,
+        'author': 'you'
+      })
+      axios.post('talk', this.form)
+      .then(res => {
+        this.messages.push({
+          'text': res.data[0].messageList[0],
+          'author': 'yoda'
+        })
+      }).catch(err => {
+          console.log(err)
+      })
       
       console.log(this.form.text)
       this.form.text=''
@@ -79,5 +101,21 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.message {
+  width: 45%;
+  border-radius: 10px;
+  padding: .5em;
+/*   margin-bottom: .5em; */
+  font-size: .8em;
+}
+.message-out {
+  background: #407FFF;
+  color: white;
+  margin-left: 50%;
+}
+.message-in {
+  background: #F1F0F0;
+  color: black;
 }
 </style>

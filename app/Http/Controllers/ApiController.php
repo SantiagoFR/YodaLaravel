@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Http;
 
 class ApiController extends Controller
 {
+  
+
     public function getAuthorizationApi(Request $request) {
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
@@ -17,18 +19,51 @@ class ApiController extends Controller
         ];
         $response = Http::withHeaders($headers)->post('https://api.inbenta.io/v1/auth', $body);
         $response = json_decode($response);
-        $accessToken = $response->accessToken;
+        //TODO store expiration and retrieve new token on expiration
         $expiration = $response->expiration;
-
+        session(['authKey' =>'Bearer ' . $response->accessToken]);
 
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
-            'Authorization' => 'Bearer '.$accessToken
+            'Authorization' =>  session('authKey')
         ];
-        $response = Http::withHeaders($headers)->get('https://api.inbenta.io/v1/apis');
-        $response = json_decode($response);
-        $chatbotApiUrl = $response->apis->chatbot;
 
-        return $chatbotApiUrl;
+        $response = Http::withHeaders($headers)->get('https://api.inbenta.io/v1/apis');
+        $response = json_decode($response);   
+
+        session(['chatbotApiUrl' => $response->apis->chatbot]);
+        //TODO this will not be needed with renovation on expiration
+        $this->initConversation();
+        //TODO return different response depending of API response
+        return "Successfull";
+    }
+    // TODO: Conversation configuration on payload
+    public function initConversation() {
+        $headers = [
+            'x-inbenta-key' => env('API_KEY'),
+            'Authorization' => session('authKey')
+        ];
+        $response = Http::withHeaders($headers)->post(session('chatbotApiUrl') . "/v1/conversation");
+        $response = json_decode($response);
+        session(['sessionToken' => 'Bearer ' . $response->sessionToken]);
+        session(['sessionId' => $response->sessionId]);
+    }
+
+    public function talk(Request $request) {
+
+        if(!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
+
+        $headers = [
+            'x-inbenta-key' => env('API_KEY'),
+            'Authorization' => session('authKey'),
+            'x-inbenta-session' => session('sessionToken')
+        ];
+        $response = Http::withHeaders($headers)
+        ->post(session('chatbotApiUrl') . "/v1/conversation/message", [
+            'message' => $request->text
+        ]);
+        $response = json_decode($response);
+
+        return $response->answers;
     }
 }

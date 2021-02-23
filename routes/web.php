@@ -16,3 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('home');
 });
+
+Route::get('getAuthorizationApi', 'App\Http\Controllers\ApiController@getAuthorizationApi');
+Route::post('talk', 'App\Http\Controllers\ApiController@talk');
