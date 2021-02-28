@@ -58,9 +58,7 @@ class ApiController extends Controller
     }
 
     public function talk(Request $request) {
-        
-
-        if (date('Y-m-d H:i:s', session('expiration')) < date("Y-m-d H:i:s")) $this->getAuthorizationApi();
+        if (session('expiration') < strtotime('now')) $this->getAuthorizationApi();
         if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
 
         if(str_contains($request->text, 'force')){
@@ -133,12 +131,7 @@ class ApiController extends Controller
 
     public function getHistory ()
     {        
-        $this->getAuthorizationApi();
-        $this->initConversation();
-        if (date('Y-m-d H:i:s', session('expiration')) < date("Y-m-d H:i:s")) {
-            $this->getAuthorizationApi();
-            $this->initConversation();
-        }
+        if (session('expiration') < strtotime('now')) $this->getAuthorizationApi();
         if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
 
         $headers = [
