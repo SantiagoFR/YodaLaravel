@@ -1,0 +1,35 @@
+.container {
+    background-image: linear-gradient(to right, white, white),
+                      linear-gradient(to bottom, white, white),
+                      linear-gradient(to right, white, white),
+                      linear-gradient(to bottom, white, white),
+                      linear-gradient(to right, red, red);
+  
+    background-repeat: no-repeat;
+    background-size: calc(100% - 10px) 1px, 1px calc(100% - 10px), calc(100% - 10px) 1px, 1px calc(100% - 10px), 100% 100%;
+    background-position:  5px 5px, top 5px right 5px, bottom 5px right 5px, 5px 5px, 0 0;
+}
+#app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 60px;
+}
+.message {
+    width: 45%;
+    border-radius: 10px;
+    padding: .5em;
+    /*   margin-bottom: .5em; */
+    font-size: .8em;
+}
+.message-out {
+    background: #407FFF;
+    color: white;
+    margin-left: 50%;
+}
+.message-in {
+    background: #F1F0F0;
+    color: black;
+}

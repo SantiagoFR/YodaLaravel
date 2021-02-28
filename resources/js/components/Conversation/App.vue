@@ -92,30 +92,3 @@ export default {
   }
 }
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-.message {
-  width: 45%;
-  border-radius: 10px;
-  padding: .5em;
-/*   margin-bottom: .5em; */
-  font-size: .8em;
-}
-.message-out {
-  background: #407FFF;
-  color: white;
-  margin-left: 50%;
-}
-.message-in {
-  background: #F1F0F0;
-  color: black;
-}
-</style>
