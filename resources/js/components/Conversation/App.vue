@@ -111,11 +111,6 @@ export default {
       .then(res => {
         if (res.data.type === "message") this.messages.push({'messageList': res.data.message.messageList, 'user': 'bot', 'datetime': Date.now()})
         else if (res.data.type === "list") this.messages.push({'messageList': [res.data.message], 'user': 'bot', 'datetime': Date.now()})
-        this.messages.push({
-          'messageList': res.data[0].messageList,
-          'user': 'bot',
-          'datetime': Date.now()
-        })
         this.writing=false
       }).catch(err => {
           console.log(err)
