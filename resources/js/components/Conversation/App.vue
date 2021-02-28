@@ -62,7 +62,7 @@ export default {
   created () {
       axios.get('getHistory')
       .then(res => {
-          this.messages = res.data
+          if (res.data !== "error") this.messages = res.data
       }).catch(err => {
           console.log(err)
       })

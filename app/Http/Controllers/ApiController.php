@@ -131,7 +131,10 @@ class ApiController extends Controller
 
     public function getHistory ()
     {        
-        if (session('expiration') < strtotime('now')) $this->getAuthorizationApi();
+        if (!session()->has('expiration') || session('expiration') < strtotime('now')) {
+            $this->getAuthorizationApi();
+            $this->initConversation();
+        }
         if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
 
         $headers = [
