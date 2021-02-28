@@ -17,26 +17,33 @@ class ApiController extends Controller
         $body = [
             'secret' =>  env('API_SECRET')
         ];
+        // Auth endpoint to get access token 
         $response = Http::withHeaders($headers)->post('https://api.inbenta.io/v1/auth', $body);
-        $response = json_decode($response);
+        $arrResponse = $response->json();
         //TODO store expiration and retrieve new token on expiration
-        $expiration = $response->expiration;
-        dump($expiration);
-        session(['authKey' =>'Bearer ' . $response->accessToken]);
+        if (empty($arrResponse)) {
+            return 'Error: Auth endpoint response is empty';
+        }
+        session(['expiration' => $arrResponse['expiration'] ]);
+        session(['authKey' =>'Bearer ' . $response['accessToken']]);
 
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
             'Authorization' =>  session('authKey')
         ];
 
+        // Api endpoint to get chatbot API url 
         $response = Http::withHeaders($headers)->get('https://api.inbenta.io/v1/apis');
-        $response = json_decode($response);   
-
-        session(['chatbotApiUrl' => $response->apis->chatbot]);
+        $arrResponse = $response->json();
+        if (empty($arrResponse)) {
+            return 'Error: Apis endpoint response is empty';
+        }
+        session(['chatbotApiUrl' => $arrResponse['apis']['chatbot']]);
         //TODO this will not be needed with renovation on expiration
         $this->initConversation();
+
         //TODO return different response depending of API response
-        return $response;
+        return "Auth and Apis calls was succesfull";
     }
     // TODO: Conversation configuration on payload
     public function initConversation() {
@@ -44,10 +51,14 @@ class ApiController extends Controller
             'x-inbenta-key' => env('API_KEY'),
             'Authorization' => session('authKey')
         ];
+        // ChatBot '/conversation' endpoint
         $response = Http::withHeaders($headers)->post(session('chatbotApiUrl') . "/v1/conversation");
-        $response = json_decode($response);
-        session(['sessionToken' => 'Bearer ' . $response->sessionToken]);
-        session(['sessionId' => $response->sessionId]);
+        $arrResponse = $response->json();
+        if (empty($arrResponse)) {
+            return 'Error: InitConversation endpoint response is empty';
+        }
+        session(['sessionToken' => 'Bearer ' . $arrResponse['sessionToken']]);
+        session(['sessionId' => $arrResponse['sessionId']]);
     }
 
     public function talk(Request $request) {
@@ -63,8 +74,11 @@ class ApiController extends Controller
         ->post(session('chatbotApiUrl') . "/v1/conversation/message", [
             'message' => $request->text
         ]);
-        $response = json_decode($response);
+        $arrResponse = $response->json();
 
-        return $response->answers;
+        if (empty($arrResponse)) {
+            return 'Error: "conversation/message" endpoint response is empty';
+        }
+        return $response['answers'];
     }
 }
