@@ -78,7 +78,6 @@ class ApiController extends Controller
                 'query' => "{allFilms(first: 10) {films{title}}}"
             ]);
             $arrResponse = $response->json();
-            dump($arrResponse);
             $message =  'Here is a list of Star Wars Films: <br>';
             foreach($arrResponse['data']['allFilms']['films'] as $character){
                 $message = $message . $character['title'] . '<br>';
