@@ -1,31 +1,48 @@
 <template>
-  <div>
-    <b-form @submit.prevent="onSubmit">
-      <b-row class="justify-content-center">
-        <b-col cols="7">
-          <b-form-group>
-            <b-form-input 
-            v-model="form.text" 
-            placeholder="Introduzca el texto"
-            :state="validateState('text')"
-            aria-describedby="input-1-live-feedback"></b-form-input>
-            <b-form-invalid-feedback id="input-1-live-feedback">
-              This is a required field and must be at least 3 characters.
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </b-col>
-        <b-col cols="2">
-          <b-button variant="outline-secondary" style="width:100px" type="submit">Enviar</b-button>
-        </b-col>
-      </b-row>
-    </b-form>
-    <div class="row justify-content-center">
-      <div class="col-9">
-        <section ref="chatArea" class="chat-area">
-        <p v-for="message in messages" class="message" :class="{ 'message-out': message.author === 'you', 'message-in': message.author !== 'you' }">
-          {{ message.text }}
-        </p>
-      </section>
+  <div>  
+    <div class="container main-section">
+      <div class="row">
+        <div class="col-12 right-sidebar">
+          <div class="row">
+            <div class="col-md-12 right-header">
+              <div class="right-header-img">
+                <img src="img/mini-yoda.jpg">
+              </div>
+              <div class="right-header-detail">
+                <p>Yoda</p>
+                <span v-if="writing"> writing... </span>
+                <span v-else>already {{messages.length}} messages </span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 right-header-contentChat">
+              <ul>
+                <Message v-for="(message, i) in messages" :message="message" :key="i"> </Message>
+              </ul>
+            </div>
+          </div>
+          
+          <b-form @submit.prevent="onSubmit">
+            <div class="row">
+                <div class="col-md-9 right-chat-textbox">
+                    <b-form-group>
+                      <b-form-input 
+                      v-model="form.text" 
+                      placeholder="Write to Yoda"
+                      :state="validateState('text')"
+                      aria-describedby="input-1-live-feedback"></b-form-input>
+                      <b-form-invalid-feedback id="input-1-live-feedback">
+                        This is a required field and must be at least 3 characters.
+                      </b-form-invalid-feedback>
+                    </b-form-group>
+                </div>
+                <div class="col-md-3 right-chat-textbox">              
+                  <b-button variant="outline-secondary" style="width:100px" type="submit">Send message</b-button>
+                </div>
+            </div>          
+          </b-form>
+        </div>
       </div>
     </div>
   </div>
@@ -34,24 +51,32 @@
 <script>
 //TODO: Change form to HTML
 import { required, minLength } from 'vuelidate/lib/validators'
+import Message from './Message.vue'
 
 export default {
   components: {
+    Message
   },
-  mounted () {
+  created () {
       axios.get('getAuthorizationApi')
       .then(res => {
           console.log('Conversacion iniciada correctamente')
       }).catch(err => {
           console.log(err)
       })
+      $(document).ready(function(){
+        var height = $(window).height();
+        $('.left-chat').css('height', (height - 92) + 'px');
+        $('.right-header-contentChat').css('height', (height - 163) + 'px');
+      });
   },
   data () {
     return {
       messages: [],
       form: {
         text: null
-      }
+      },
+      writing: false
     }    
   },
   validations: {
@@ -72,18 +97,21 @@ export default {
         'text': this.form.text,
         'author': 'you'
       })
+      this.writing=true
       axios.post('talk', this.form)
       .then(res => {
         this.messages.push({
           'text': res.data[0].messageList[0],
           'author': 'yoda'
         })
+        this.writing=false
       }).catch(err => {
           console.log(err)
       })
       
       console.log(this.form.text)
       this.form.text=''
+      this.$v.$reset();
     },
     validateState(name) {
       const { $dirty, $error } = this.$v.form[name];

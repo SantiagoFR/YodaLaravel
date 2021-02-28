@@ -28,6 +28,7 @@ class ApiController extends Controller
         if (empty($arrResponse)) {
             return 'Error: Auth endpoint response is empty';
         }
+        dump($arrResponse['expires_in']);
         session(['expiration' => $arrResponse['expiration'] ]);
         session(['authKey' =>'Bearer ' . $response['accessToken']]);
 
@@ -68,8 +69,8 @@ class ApiController extends Controller
     }
 
     public function talk(Request $request) {
-
-        if(!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
+        if (date('Y-m-d H:i:s', session('expiration')) < date("Y-m-d H:i:s")) $this->getAuthorizationApi();
+        if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
 
         $headers = [
             'x-inbenta-key' => env('API_KEY'),

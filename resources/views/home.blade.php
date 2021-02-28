@@ -19,7 +19,7 @@
         </style>
     </head>
     <body class="antialiased">
-        <div id='app' class="container">
+        <div id='app'>
             <Conversation></Conversation>
         </div>
     </body>
