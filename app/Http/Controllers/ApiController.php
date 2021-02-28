@@ -21,6 +21,7 @@ class ApiController extends Controller
         $response = json_decode($response);
         //TODO store expiration and retrieve new token on expiration
         $expiration = $response->expiration;
+        dump($expiration);
         session(['authKey' =>'Bearer ' . $response->accessToken]);
 
         $headers = [
@@ -35,7 +36,7 @@ class ApiController extends Controller
         //TODO this will not be needed with renovation on expiration
         $this->initConversation();
         //TODO return different response depending of API response
-        return "Successfull";
+        return $response;
     }
     // TODO: Conversation configuration on payload
     public function initConversation() {
