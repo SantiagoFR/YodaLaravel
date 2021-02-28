@@ -23,7 +23,6 @@ class ApiController extends Controller
         
         Flare::context('Auth Response', $arrResponse);
 
-        //TODO store expiration and retrieve new token on expiration
         if (empty($arrResponse)) {
             return 'Error: Auth endpoint response is empty';
         }
@@ -43,10 +42,7 @@ class ApiController extends Controller
             return 'Error: Apis endpoint response is empty';
         }
         session(['chatbotApiUrl' => $arrResponse['apis']['chatbot']]);
-        //TODO this will not be needed with renovation on expiration
-        $this->initConversation();
 
-        //TODO return different response depending of API response
         return "Auth and Apis calls was succesfull";
     }
     // TODO: Conversation configuration on payload
@@ -68,9 +64,32 @@ class ApiController extends Controller
     }
 
     public function talk(Request $request) {
+        
         Flare::context('Session state', session());
         if (date('Y-m-d H:i:s', session('expiration')) < date("Y-m-d H:i:s")) $this->getAuthorizationApi();
         if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
+
+        if(str_contains($request->text, 'force')){
+            $headers = [
+                'Content-Type' => 'application/json'
+            ];
+            $response = Http::withHeaders($headers)
+            ->post("https://inbenta-graphql-swapi-prod.herokuapp.com/api", [
+                'query' => "{allFilms(first: 10) {films{title}}}"
+            ]);
+            $arrResponse = $response->json();
+            dump($arrResponse);
+            $message =  'Here is a list of Star Wars Films: <br>';
+            foreach($arrResponse['data']['allFilms']['films'] as $character){
+                $message = $message . $character['title'] . '<br>';
+            }               
+    
+            return [
+                'type' => 'list',
+                'message' => $message
+            ];
+        }
+        
 
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
@@ -82,11 +101,68 @@ class ApiController extends Controller
             'message' => $request->text
         ]);
         $arrResponse = $response->json();
+
         Flare::context('Chatbot Conversation/Message Response', $arrResponse);
 
-        if (empty($arrResponse)) {
-            return 'Error: "conversation/message" endpoint response is empty';
+        if (empty($arrResponse)) {            
+            return [ 
+                'type' => 'error',
+                'messages' => 'Error: "conversation/message" endpoint response is empty'
+            ];
         }
-        return $response['answers'];
+        if (isset($arrResponse['answers'][0]['flags'][0]) && $arrResponse['answers'][0]['flags'][0] === "no-results") {  
+            if(session('noResultsNumber') !== 2) session(['noResultsNumber' => session('noResultsNumber') + 1]);   
+            else {
+                session(['noResultsNumber' => 0]);
+                $headers = [
+                    'Content-Type' => 'application/json'
+                ];
+                $response = Http::withHeaders($headers)
+                ->post("https://inbenta-graphql-swapi-prod.herokuapp.com/api", [
+                    'query' => "{allPeople(first: 10) { people { name } } }"
+                ]);
+                $arrResponse = $response->json();
+                $message =  'Here is a list of Star Wars Characters: <br>';
+                foreach($arrResponse['data']['allPeople']['people'] as $character){
+                    $message = $message . $character['name'] . '<br>';
+                }               
+        
+                return [
+                    'type' => 'list',
+                    'message' => $message
+                ];
+            } 
+        }
+        return [
+            'type' => 'message',
+            'message' => $response['answers'][0]
+        ];
+    }
+
+    public function getHistory ()
+    {        
+        $this->getAuthorizationApi();
+        $this->initConversation();
+        if (date('Y-m-d H:i:s', session('expiration')) < date("Y-m-d H:i:s")) {
+            $this->getAuthorizationApi();
+            $this->initConversation();
+        }
+        if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
+
+        $headers = [
+            'x-inbenta-key' => env('API_KEY'),
+            'Authorization' => session('authKey'),
+            'x-inbenta-session' => session('sessionToken')
+        ];
+        $response = Http::withHeaders($headers)
+        ->get(session('chatbotApiUrl') . "/v1/conversation/history");
+        $arrResponse = $response->json();
+
+        Flare::context('Chatbot Conversation/History Response', $arrResponse);
+
+        if (empty($arrResponse)) {
+            return 'error';
+        }
+        return $arrResponse;
     }
 }

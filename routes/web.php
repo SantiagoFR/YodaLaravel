@@ -17,5 +17,5 @@ Route::get('/', function () {
     return view('home');
 });
 
-Route::get('getAuthorizationApi', 'App\Http\Controllers\ApiController@getAuthorizationApi');
+Route::get('getHistory', 'App\Http\Controllers\ApiController@getHistory');
 Route::post('talk', 'App\Http\Controllers\ApiController@talk');

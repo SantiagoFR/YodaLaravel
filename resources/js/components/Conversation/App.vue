@@ -51,7 +51,6 @@
 </template>
 
 <script>
-//TODO: Change form to HTML
 import { required, minLength } from 'vuelidate/lib/validators'
 import Message from './Message.vue'
 
@@ -60,7 +59,7 @@ export default {
     Message
   },
   created () {
-      axios.get('getAuthorizationApi')
+      axios.get('getHistory')
       .then(res => {
           console.log('Conversacion iniciada correctamente')
       }).catch(err => {
@@ -89,6 +88,12 @@ export default {
       }
     }
   },
+  watch: {
+    messages: async function () {
+      await new Promise(r => setTimeout(r, 250));
+      $('.right-header-contentChat').scrollTop($('.right-header-contentChat')[0].scrollHeight);
+    }
+  },
   methods: {
     onSubmit: function () {
       this.$v.form.$touch();
@@ -96,24 +101,28 @@ export default {
         return;
       }
       this.messages.push({
-        'text': this.form.text,
-        'author': 'you'
+        'messageList': [this.form.text],
+        'user': 'user',
+        'datetime': Date.now()
       })
       this.writing=true
       axios.post('talk', this.form)
       .then(res => {
+        if (res.data.type === "message") this.messages.push({'messageList': res.data.message.messageList, 'user': 'bot', 'datetime': Date.now()})
+        else if (res.data.type === "list") this.messages.push({'messageList': [res.data.message], 'user': 'bot', 'datetime': Date.now()})
         this.messages.push({
-          'text': res.data[0].messageList[0],
-          'author': 'yoda'
+          'messageList': res.data[0].messageList,
+          'user': 'bot',
+          'datetime': Date.now()
         })
         this.writing=false
       }).catch(err => {
           console.log(err)
       })
       
-      console.log(this.form.text)
       this.form.text=''
       this.$v.$reset();
+
     },
     validateState(name) {
       const { $dirty, $error } = this.$v.form[name];
