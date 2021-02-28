@@ -25,20 +25,22 @@
           
           <b-form @submit.prevent="onSubmit">
             <div class="row">
-                <div class="col-md-9 right-chat-textbox">
+                <div class="col-md-12 right-chat-textbox">
                     <b-form-group>
-                      <b-form-input 
-                      v-model="form.text" 
-                      placeholder="Write to Yoda"
-                      :state="validateState('text')"
-                      aria-describedby="input-1-live-feedback"></b-form-input>
-                      <b-form-invalid-feedback id="input-1-live-feedback">
-                        This is a required field and must be at least 3 characters.
-                      </b-form-invalid-feedback>
+                      <b-input-group class="mt-3">                        
+                        <b-form-input 
+                        v-model="form.text" 
+                        placeholder="Write to Yoda"
+                        :state="validateState('text')"
+                        aria-describedby="input-1-live-feedback"></b-form-input>
+                        <b-form-invalid-feedback id="input-1-live-feedback">
+                          This is a required field and must be at least 3 characters.
+                        </b-form-invalid-feedback>
+                        <b-input-group-append>
+                          <b-button type="submit" variant="outline-success"> <b-icon icon="cursor-fill"></b-icon> </b-button>
+                        </b-input-group-append>
+                      </b-input-group>
                     </b-form-group>
-                </div>
-                <div class="col-md-3 right-chat-textbox">              
-                  <b-button variant="outline-secondary" style="width:100px" type="submit">Send message</b-button>
                 </div>
             </div>          
           </b-form>
