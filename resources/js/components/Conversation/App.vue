@@ -62,7 +62,7 @@ export default {
   created () {
       axios.get('getHistory')
       .then(res => {
-          console.log('Conversacion iniciada correctamente')
+          this.messages = res.data
       }).catch(err => {
           console.log(err)
       })
