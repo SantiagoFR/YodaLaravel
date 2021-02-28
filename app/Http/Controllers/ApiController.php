@@ -10,7 +10,7 @@ class ApiController extends Controller
 {
   
 
-    public function getAuthorizationApi(Request $request) {
+    public function getAuthorizationApi() {
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
             'Content-Type' => 'application/json'
