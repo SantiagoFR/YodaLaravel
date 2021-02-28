@@ -4,12 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Facade\Ignition\Facades\Flare;
 
 class ApiController extends Controller
 {
     public function getAuthorizationApi() {
-        Flare::context('Session state', session());
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
             'Content-Type' => 'application/json'
@@ -21,7 +19,6 @@ class ApiController extends Controller
         $response = Http::withHeaders($headers)->post('https://api.inbenta.io/v1/auth', $body);
         $arrResponse = $response->json();
         
-        Flare::context('Auth Response', $arrResponse);
 
         if (empty($arrResponse)) {
             return 'Error: Auth endpoint response is empty';
@@ -37,7 +34,6 @@ class ApiController extends Controller
         // Api endpoint to get chatbot API url 
         $response = Http::withHeaders($headers)->get('https://api.inbenta.io/v1/apis');
         $arrResponse = $response->json();
-        Flare::context('Api Response', $arrResponse);
         if (empty($arrResponse)) {
             return 'Error: Apis endpoint response is empty';
         }
@@ -47,7 +43,6 @@ class ApiController extends Controller
     }
     // TODO: Conversation configuration on payload
     public function initConversation() {
-        Flare::context('Session state', session());
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
             'Authorization' => session('authKey')
@@ -55,7 +50,6 @@ class ApiController extends Controller
         // ChatBot '/conversation' endpoint
         $response = Http::withHeaders($headers)->post(session('chatbotApiUrl') . "/v1/conversation");
         $arrResponse = $response->json();
-        Flare::context('Chatbot Conversation Response', $arrResponse);
         if (empty($arrResponse)) {
             return 'Error: InitConversation endpoint response is empty';
         }
@@ -65,7 +59,7 @@ class ApiController extends Controller
 
     public function talk(Request $request) {
         
-        Flare::context('Session state', session());
+
         if (date('Y-m-d H:i:s', session('expiration')) < date("Y-m-d H:i:s")) $this->getAuthorizationApi();
         if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
 
@@ -101,7 +95,6 @@ class ApiController extends Controller
         ]);
         $arrResponse = $response->json();
 
-        Flare::context('Chatbot Conversation/Message Response', $arrResponse);
 
         if (empty($arrResponse)) {            
             return [ 
@@ -157,7 +150,6 @@ class ApiController extends Controller
         ->get(session('chatbotApiUrl') . "/v1/conversation/history");
         $arrResponse = $response->json();
 
-        Flare::context('Chatbot Conversation/History Response', $arrResponse);
 
         if (empty($arrResponse)) {
             return 'error';

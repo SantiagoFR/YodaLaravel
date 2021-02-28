@@ -29,6 +29,7 @@
                     <b-form-group>
                       <b-input-group class="mt-3">                        
                         <b-form-input 
+                        autocomplete="off"
                         v-model="form.text" 
                         placeholder="Write to Yoda"
                         :state="validateState('text')"
