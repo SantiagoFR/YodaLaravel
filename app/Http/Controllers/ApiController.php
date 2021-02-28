@@ -8,9 +8,8 @@ use Facade\Ignition\Facades\Flare;
 
 class ApiController extends Controller
 {
-  
-
     public function getAuthorizationApi() {
+        Flare::context('Session state', session());
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
             'Content-Type' => 'application/json'
@@ -28,7 +27,6 @@ class ApiController extends Controller
         if (empty($arrResponse)) {
             return 'Error: Auth endpoint response is empty';
         }
-        dump($arrResponse['expires_in']);
         session(['expiration' => $arrResponse['expiration'] ]);
         session(['authKey' =>'Bearer ' . $response['accessToken']]);
 
@@ -53,6 +51,7 @@ class ApiController extends Controller
     }
     // TODO: Conversation configuration on payload
     public function initConversation() {
+        Flare::context('Session state', session());
         $headers = [
             'x-inbenta-key' => env('API_KEY'),
             'Authorization' => session('authKey')
@@ -69,6 +68,7 @@ class ApiController extends Controller
     }
 
     public function talk(Request $request) {
+        Flare::context('Session state', session());
         if (date('Y-m-d H:i:s', session('expiration')) < date("Y-m-d H:i:s")) $this->getAuthorizationApi();
         if (!session()->has('sessionToken') || !session()->has('sessionId')) $this->initConversation();
 
