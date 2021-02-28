@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Facade\Ignition\Facades\Flare;
 
 class ApiController extends Controller
 {
@@ -20,6 +21,9 @@ class ApiController extends Controller
         // Auth endpoint to get access token 
         $response = Http::withHeaders($headers)->post('https://api.inbenta.io/v1/auth', $body);
         $arrResponse = $response->json();
+        
+        Flare::context('Auth Response', $arrResponse);
+
         //TODO store expiration and retrieve new token on expiration
         if (empty($arrResponse)) {
             return 'Error: Auth endpoint response is empty';
@@ -35,6 +39,7 @@ class ApiController extends Controller
         // Api endpoint to get chatbot API url 
         $response = Http::withHeaders($headers)->get('https://api.inbenta.io/v1/apis');
         $arrResponse = $response->json();
+        Flare::context('Api Response', $arrResponse);
         if (empty($arrResponse)) {
             return 'Error: Apis endpoint response is empty';
         }
@@ -54,6 +59,7 @@ class ApiController extends Controller
         // ChatBot '/conversation' endpoint
         $response = Http::withHeaders($headers)->post(session('chatbotApiUrl') . "/v1/conversation");
         $arrResponse = $response->json();
+        Flare::context('Chatbot Conversation Response', $arrResponse);
         if (empty($arrResponse)) {
             return 'Error: InitConversation endpoint response is empty';
         }
@@ -75,6 +81,7 @@ class ApiController extends Controller
             'message' => $request->text
         ]);
         $arrResponse = $response->json();
+        Flare::context('Chatbot Conversation/Message Response', $arrResponse);
 
         if (empty($arrResponse)) {
             return 'Error: "conversation/message" endpoint response is empty';
